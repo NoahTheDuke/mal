@@ -1,24 +1,33 @@
+use mal::printer;
 use mal::reader;
+use mal::reader::ParseResult;
+use mal::types::MalError;
+use mal::types::MalType;
 use rustyline::{error::ReadlineError, Editor};
 
-fn read(inp: &str) -> &str {
-    inp
+fn read(inp: &str) -> ParseResult {
+    reader::read_str(inp)
 }
 
-fn eval(inp: &str) -> &str {
-    inp
+fn eval(form: Vec<MalType>) -> ParseResult {
+    Ok(form)
 }
 
-fn print(inp: &str) -> String {
-    inp.to_string()
+fn print(form: Vec<MalType>) -> Result<String, MalError> {
+    Ok(form
+        .iter()
+        .map(printer::pr_str)
+        .collect::<Vec<String>>()
+        .join("\n"))
 }
 
-fn rep(inp: &str) -> Result<String, String> {
-    Ok(print(eval(read(inp))))
+fn rep(inp: &str) -> Result<String, MalError> {
+    read(inp).and_then(eval).and_then(print)
 }
 
 pub fn prompt() {
     let mut rl = Editor::<()>::new();
+    rl.load_history(reader::MAL_HISTORY).unwrap_or_default();
     loop {
         let readline = rl.readline("user> ");
         match readline {
@@ -27,7 +36,8 @@ pub fn prompt() {
                 rl.save_history(reader::MAL_HISTORY).unwrap();
                 match rep(line.as_str()) {
                     Ok(result) => println!("{}", result),
-                    Err(_) => unreachable!(),
+                    Err(MalError::Normal(err)) => println!("{}", err),
+                    Err(MalError::Parsing(err)) => println!("{}", err),
                 }
             }
             Err(ReadlineError::Interrupted) => {
@@ -54,12 +64,13 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use crate::rep;
+    use mal::types::MalError;
     use regex::Regex;
     use std::fs;
 
     #[test]
     fn mal_tests() {
-        let tests = fs::read_to_string("tests/step0_repl.mal")
+        let tests = fs::read_to_string("tests/step1_read_print.mal")
             .expect("Something went wrong reading the file");
         for (idx, p) in tests
             .lines()
@@ -109,7 +120,23 @@ mod tests {
                         unreachable!("single-element line: {}, {:?}", 2 * idx, p);
                     }
                 }
-                Err(err) => {
+                Err(MalError::Parsing(ref err)) => {
+                    let expected = p[1].to_owned();
+                    if expected.starts_with(";/") {
+                        let replaced = expected.replace('{', "\\{");
+                        let stripped = replaced.strip_prefix(";/").unwrap_or(&replaced);
+                        assert!(
+                            Regex::new(&format!("(?is){}", stripped)).unwrap().is_match(err),
+                            "\nGiven    : `{}`\nExpected : `{}`\nGot      : `{}`",
+                            input,
+                            stripped,
+                            err,
+                        )
+                    } else {
+                        assert_eq!(expected, "a", "parsing {:?}", p);
+                    }
+                }
+                Err(MalError::Normal(ref err)) => {
                     panic!("Normal err {}", err)
                 }
             }
