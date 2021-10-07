@@ -1,33 +1,70 @@
-use crate::types::{MalAtom, MalType};
+use crate::types::{MalAtom, MalError, MalFunction, MalType};
+use std::{fmt, result};
 
-fn pr_str_atom(code: &MalAtom) -> String {
-    match code {
-        MalAtom::Symbol(s) => s.to_string(),
-        MalAtom::Integer(i) => i.to_string(),
-        MalAtom::Str(s) => s.to_string(),
-        MalAtom::Keyword(k) => format!(":{}", k),
-        MalAtom::Boolean(b) => b.to_string(),
-        MalAtom::Nil => "nil".to_string(),
+impl fmt::Display for MalAtom {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            MalAtom::Keyword(k) => write!(f, ":{}", k),
+            MalAtom::Symbol(s) => write!(f, "{}", s),
+            MalAtom::Integer(i) => write!(f, "{}", i),
+            MalAtom::Str(s) => write!(f, "{}", s),
+            MalAtom::Boolean(b) => write!(f, "{}", b),
+            MalAtom::Nil => write!(f, "nil"),
+        }
+    }
+}
+
+impl fmt::Display for MalType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            MalType::Atom(v) => write!(f, "{}", v),
+            MalType::List(l) => write!(
+                f,
+                "({})",
+                l.iter()
+                    .map(|i| i.to_string())
+                    .collect::<Vec<String>>()
+                    .join(" ")
+            ),
+            MalType::Vector(v) => write!(
+                f,
+                "[{}]",
+                v.iter()
+                    .map(|i| i.to_string())
+                    .collect::<Vec<String>>()
+                    .join(" ")
+            ),
+            MalType::Map(m) => write!(
+                f,
+                "{{{}}}",
+                m.iter()
+                    .map(|(k, v)| { format!("{} {}", k.to_string(), v.to_string()) })
+                    .collect::<Vec<String>>()
+                    .join(" ")
+            ),
+            MalType::Function(func) => write!(f, "[function {}]", func.name,),
+        }
     }
 }
 
 pub fn pr_str(code: &MalType) -> String {
-    match code {
-        MalType::List(l) => format!(
-            "({})",
-            l.iter().map(pr_str).collect::<Vec<String>>().join(" ")
-        ),
-        MalType::Vector(v) => format!(
-            "[{}]",
-            v.iter().map(pr_str).collect::<Vec<String>>().join(" ")
-        ),
-        MalType::Atom(v) => pr_str_atom(v),
-        MalType::Map(m) => format!(
-            "{{{}}}",
-            m.iter()
-                .map(|(k, v)| { format!("{} {}", pr_str_atom(k), pr_str(v)) })
-                .collect::<Vec<String>>()
-                .join(" ")
-        ),
+    code.to_string()
+}
+
+impl fmt::Debug for MalFunction {
+    fn fmt(&self, f: &mut fmt::Formatter) -> result::Result<(), fmt::Error> {
+        f.debug_struct("Function")
+            .field("name", &self.name)
+            .finish()
+    }
+}
+
+impl fmt::Display for MalError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            MalError::Normal(s) => write!(f, "{}", s),
+            MalError::Parsing(s) => write!(f, "Parsing error{}", s),
+            MalError::Resolve(s) => write!(f, "Symbol `{}` does not exist", s),
+        }
     }
 }

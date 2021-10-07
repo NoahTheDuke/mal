@@ -1,19 +1,20 @@
+#![allow(non_snake_case)]
+
 use mal::printer;
 use mal::reader;
-use mal::reader::ParseResult;
 use mal::types::MalError;
 use mal::types::MalType;
 use rustyline::{error::ReadlineError, Editor};
 
-fn read(inp: &str) -> ParseResult {
+fn READ(inp: &str) -> Result<Vec<MalType>, MalError> {
     reader::read_str(inp)
 }
 
-fn eval(form: Vec<MalType>) -> ParseResult {
+fn EVAL(form: Vec<MalType>) -> Result<Vec<MalType>, MalError> {
     Ok(form)
 }
 
-fn print(form: Vec<MalType>) -> Result<String, MalError> {
+fn PRINT(form: Vec<MalType>) -> Result<String, MalError> {
     Ok(form
         .iter()
         .map(printer::pr_str)
@@ -22,7 +23,7 @@ fn print(form: Vec<MalType>) -> Result<String, MalError> {
 }
 
 fn rep(inp: &str) -> Result<String, MalError> {
-    read(inp).and_then(eval).and_then(print)
+    READ(inp).and_then(EVAL).and_then(PRINT)
 }
 
 pub fn prompt() {
@@ -36,8 +37,7 @@ pub fn prompt() {
                 rl.save_history(reader::MAL_HISTORY).unwrap();
                 match rep(line.as_str()) {
                     Ok(result) => println!("{}", result),
-                    Err(MalError::Normal(err)) => println!("{}", err),
-                    Err(MalError::Parsing(err)) => println!("{}", err),
+                    Err(err) => println!("{}", err),
                 }
             }
             Err(ReadlineError::Interrupted) => {
@@ -75,10 +75,7 @@ mod tests {
         for (idx, p) in tests
             .lines()
             .filter_map(|l| {
-                if l.starts_with(";;")
-                    || l.starts_with(";>>>")
-                    || l.trim().is_empty()
-                {
+                if l.starts_with(";;") || l.starts_with(";>>>") || l.trim().is_empty() {
                     None
                 } else {
                     Some(l.to_string())
@@ -126,7 +123,9 @@ mod tests {
                         let replaced = expected.replace('{', "\\{");
                         let stripped = replaced.strip_prefix(";/").unwrap_or(&replaced);
                         assert!(
-                            Regex::new(&format!("(?is){}", stripped)).unwrap().is_match(err),
+                            Regex::new(&format!("(?is){}", stripped))
+                                .unwrap()
+                                .is_match(err),
                             "\nGiven    : `{}`\nExpected : `{}`\nGot      : `{}`",
                             input,
                             stripped,
@@ -138,6 +137,9 @@ mod tests {
                 }
                 Err(MalError::Normal(ref err)) => {
                     panic!("Normal err {}", err)
+                }
+                Err(MalError::Resolve(ref err)) => {
+                    panic!("Resolve err {}", err)
                 }
             }
         }

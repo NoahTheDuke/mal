@@ -5,7 +5,8 @@ list = { "(" ~ value* ~ ")" }
 vector = { "[" ~ value* ~ "]" }
 map = { "{" ~ (atom ~ value)* ~ "}" }
 
-atom = _{ (symbol | keyword | number | string | boolean | nil) }
+atom = _{ (number | symbol | keyword | string | boolean | nil) }
+number = @{ ("-" | "+")? ~ ASCII_DIGIT+ }
 symbol = @{
     !ASCII_DIGIT
     ~
@@ -13,9 +14,8 @@ symbol = @{
     ~
     (ASCII_ALPHANUMERIC | atom_chars)*
 }
-atom_chars = { ("-" | "=" | "+" | "*" | "|" | "<" | ">" | "!" | "_") }
+atom_chars = { ("-" | "=" | "+" | "*" | "/" | "|" | "<" | ">" | "!" | "_") }
 keyword = @{ ":" ~ symbol }
-number = @{ ASCII_DIGIT+ }
 
 string = ${ "\"" ~ string_inner ~ "\"" }
 string_inner = @{ char* }

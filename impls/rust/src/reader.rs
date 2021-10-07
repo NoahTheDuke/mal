@@ -1,5 +1,5 @@
 use crate::types::{MalAtom, MalError, MalType};
-use pest::{Parser, error, iterators::Pair};
+use pest::{error, iterators::Pair, Parser};
 use std::collections::HashMap;
 
 pub static MAL_HISTORY: &str = ".mal-history";
@@ -42,12 +42,9 @@ fn parse_value(pair: Pair<Rule>) -> Option<MalType> {
             }
             hm
         })),
-        Rule::number
-        | Rule::symbol
-        | Rule::string
-        | Rule::keyword
-        | Rule::boolean
-        | Rule::nil => Some(MalType::Atom(parse_atom(pair))),
+        Rule::number | Rule::symbol | Rule::string | Rule::keyword | Rule::boolean | Rule::nil => {
+            Some(MalType::Atom(parse_atom(pair)))
+        }
         _ => unreachable!("value? {:?}", pair.as_rule()),
     }
 }
@@ -55,7 +52,7 @@ fn parse_value(pair: Pair<Rule>) -> Option<MalType> {
 fn parse_error(err: error::Error<Rule>) -> MalError {
     let err_str = err.to_string();
     MalError::Parsing(format!(
-        "Parsing error{}{}",
+        "{}{}",
         if (err_str.matches('(').count() != err_str.matches(')').count())
             || (err_str.matches('[').count() != err_str.matches(']').count())
             || ((err_str.matches('"').count() % 2) != 0)
@@ -65,13 +62,11 @@ fn parse_error(err: error::Error<Rule>) -> MalError {
         } else {
             ""
         },
-        err,
+        err_str,
     ))
 }
 
-pub type ParseResult = Result<Vec<MalType>, MalError>;
-
-pub fn read_str(input: &str) -> ParseResult {
+pub fn read_str(input: &str) -> Result<Vec<MalType>, MalError> {
     match MalParser::parse(Rule::values, input) {
         Ok(pairs) => Ok(pairs
             .filter_map(|p| {

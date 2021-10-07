@@ -1,20 +1,22 @@
+#![allow(non_snake_case)]
+
 use mal::reader;
 use rustyline::{error::ReadlineError, Editor};
 
-fn read(inp: &str) -> &str {
+fn READ(inp: &str) -> &str {
     inp
 }
 
-fn eval(inp: &str) -> &str {
+fn EVAL(inp: &str) -> &str {
     inp
 }
 
-fn print(inp: &str) -> String {
+fn PRINT(inp: &str) -> String {
     inp.to_string()
 }
 
 fn rep(inp: &str) -> Result<String, String> {
-    Ok(print(eval(read(inp))))
+    Ok(PRINT(EVAL(READ(inp))))
 }
 
 pub fn prompt() {
@@ -64,10 +66,7 @@ mod tests {
         for (idx, p) in tests
             .lines()
             .filter_map(|l| {
-                if l.starts_with(";;")
-                    || l.starts_with(";>>>")
-                    || l.trim().is_empty()
-                {
+                if l.starts_with(";;") || l.starts_with(";>>>") || l.trim().is_empty() {
                     None
                 } else {
                     Some(l.to_string())
