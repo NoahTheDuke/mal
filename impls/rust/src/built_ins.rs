@@ -12,7 +12,7 @@ fn parse_numbers(args: &[MalType]) -> Result<Vec<isize>, MalError> {
     Ok(new_args)
 }
 
-fn plus(args: &[MalType]) -> Result<MalType, MalError> {
+fn plus<'a, 'b>(args: &'a [MalType]) -> Result<MalType<'b>, MalError> {
     let parsed_numbers = parse_numbers(args)?;
     match parsed_numbers.len() {
         0 => Ok(MalType::Atom(MalAtom::Integer(0))),
@@ -21,11 +21,11 @@ fn plus(args: &[MalType]) -> Result<MalType, MalError> {
     }
 }
 
-pub fn plus_fn() -> MalFunction {
+pub fn plus_fn<'a>() -> MalFunction<'a> {
     MalFunction::new("+", plus)
 }
 
-fn minus(args: &[MalType]) -> Result<MalType, MalError> {
+fn minus<'a, 'b>(args: &'a [MalType]) -> Result<MalType<'b>, MalError> {
     let parsed_numbers = parse_numbers(args)?;
     match parsed_numbers.len() {
         0 => Ok(MalType::Atom(MalAtom::Integer(0))),
@@ -38,11 +38,11 @@ fn minus(args: &[MalType]) -> Result<MalType, MalError> {
     }
 }
 
-pub fn minus_fn() -> MalFunction {
+pub fn minus_fn<'a>() -> MalFunction<'a> {
     MalFunction::new("-", minus)
 }
 
-fn multiply(args: &[MalType]) -> Result<MalType, MalError> {
+fn multiply<'a, 'b>(args: &'a [MalType]) -> Result<MalType<'b>, MalError> {
     let parsed_numbers = parse_numbers(args)?;
     match parsed_numbers.len() {
         0 => Ok(MalType::Atom(MalAtom::Integer(1))),
@@ -53,11 +53,11 @@ fn multiply(args: &[MalType]) -> Result<MalType, MalError> {
     }
 }
 
-pub fn multiply_fn() -> MalFunction {
+pub fn multiply_fn<'a>() -> MalFunction<'a> {
     MalFunction::new("*", multiply)
 }
 
-fn divide(args: &[MalType]) -> Result<MalType, MalError> {
+fn divide<'a, 'b>(args: &'a [MalType]) -> Result<MalType<'b>, MalError> {
     let parsed_numbers = parse_numbers(args)?;
     match parsed_numbers.len() {
         0 => Err(MalError::Normal("/ requires at least 1 arg".to_string())),
@@ -69,6 +69,6 @@ fn divide(args: &[MalType]) -> Result<MalType, MalError> {
     }
 }
 
-pub fn divide_fn() -> MalFunction {
+pub fn divide_fn<'a>() -> MalFunction<'a> {
     MalFunction::new("/", divide)
 }

@@ -14,7 +14,7 @@ impl fmt::Display for MalAtom {
     }
 }
 
-impl fmt::Display for MalType {
+impl fmt::Display for MalType<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             MalType::Atom(v) => write!(f, "{}", v),
@@ -51,7 +51,7 @@ pub fn pr_str(code: &MalType) -> String {
     code.to_string()
 }
 
-impl fmt::Debug for MalFunction {
+impl fmt::Debug for MalFunction<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> result::Result<(), fmt::Error> {
         f.debug_struct("Function")
             .field("name", &self.name)

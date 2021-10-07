@@ -1,21 +1,25 @@
 #![allow(non_snake_case)]
 
+use mal::env::MalEnv;
 use mal::eval;
 use mal::printer;
 use mal::reader;
-use mal::types::{MalEnv, MalError, MalType};
+use mal::types::{MalError, MalType};
 use rustyline::{error::ReadlineError, Editor};
 
 fn READ(inp: &str) -> Result<Vec<MalType>, MalError> {
     reader::read_str(inp)
 }
 
-fn EVAL(form: &MalType, env: &MalEnv) -> Result<MalType, MalError> {
+fn EVAL<'l>(form: MalType<'l>, env: &'l MalEnv<'l>) -> Result<MalType<'l>, MalError> {
     eval::eval_form(form, env)
 }
 
-fn EVAL_forms(forms: Vec<MalType>, env: &MalEnv) -> Result<Vec<MalType>, MalError> {
-    forms.iter().map(|form| EVAL(form, env)).collect()
+fn EVAL_forms<'l>(
+    forms: Vec<MalType<'l>>,
+    env: &'l MalEnv<'l>,
+) -> Result<Vec<MalType<'l>>, MalError> {
+    forms.into_iter().map(|form| EVAL(form, env)).collect()
 }
 
 fn PRINT(form: Vec<MalType>) -> Result<String, MalError> {
@@ -64,20 +68,20 @@ pub fn prompt(env: MalEnv) {
 }
 
 fn main() {
-    let env = MalEnv::new();
+    let env = MalEnv::repl();
     prompt(env);
 }
 
 #[cfg(test)]
 mod tests {
     use crate::rep;
-    use mal::types::{MalEnv, MalError};
+    use mal::{env::MalEnv, types::MalError};
     use regex::Regex;
     use std::fs;
 
     #[test]
     fn mal_tests() {
-        let env = MalEnv::new();
+        let env = MalEnv::repl();
         let tests = fs::read_to_string("tests/step2_eval.mal")
             .expect("Something went wrong reading the file");
         for (idx, p) in tests

@@ -3,6 +3,7 @@ extern crate pest;
 extern crate pest_derive;
 
 pub mod built_ins;
+pub mod env;
 pub mod eval;
 pub mod printer;
 pub mod reader;
