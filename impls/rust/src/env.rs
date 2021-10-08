@@ -1,13 +1,10 @@
 use std::collections::HashMap;
 
-use crate::{
-    built_ins::{divide_fn, minus_fn, multiply_fn, plus_fn},
-    types::MalType,
-};
+use crate::{built_ins::{divide_fn, minus_fn, multiply_fn, plus_fn}, symbol::Symbol, types::MalType};
 
 #[derive(Debug, Clone)]
 pub struct MalEnv<'a> {
-    data: HashMap<&'a str, MalType<'a>>,
+    data: HashMap<String, MalType<'a>>,
     outer: Option<Box<MalEnv<'a>>>,
 }
 
@@ -19,20 +16,24 @@ impl<'a> MalEnv<'a> {
         }
     }
 
-    pub fn get(&self, key: &str) -> Option<&MalType<'a>> {
+    pub fn get(&self, key: &str) -> Option<&MalType> {
         self.data.get(key)
+    }
+
+    pub fn get_sym(&self, key: &Symbol) -> Option<&MalType> {
+        self.data.get(&key.name)
     }
 
     pub fn repl() -> Self {
         let mut data = HashMap::new();
         let plus = plus_fn();
-        data.insert(plus.name, MalType::Function(plus));
+        data.insert(plus.name.to_string(), MalType::Function(plus));
         let minus = minus_fn();
-        data.insert(minus.name, MalType::Function(minus));
+        data.insert(minus.name.to_string(), MalType::Function(minus));
         let multiply = multiply_fn();
-        data.insert(multiply.name, MalType::Function(multiply));
+        data.insert(multiply.name.to_string(), MalType::Function(multiply));
         let divide = divide_fn();
-        data.insert(divide.name, MalType::Function(divide));
+        data.insert(divide.name.to_string(), MalType::Function(divide));
 
         MalEnv { data, outer: None }
     }

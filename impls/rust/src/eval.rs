@@ -8,7 +8,7 @@ use crate::{
 fn eval_ast<'l>(form: MalType<'l>, env: &'l MalEnv<'l>) -> Result<MalType<'l>, MalError> {
     match form {
         MalType::Atom(MalAtom::Symbol(form1)) => {
-            if let Some(op) = env.get(&form1.name) {
+            if let Some(op) = env.get_sym(&form1) {
                 Ok(op.clone())
             } else {
                 Err(MalError::Resolve(form1.name))
