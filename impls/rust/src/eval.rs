@@ -2,16 +2,16 @@ use std::collections::HashMap;
 
 use crate::{
     env::MalEnv,
-    types::{MalAtom, MalError, MalType},
+    types::{MalError, MalType},
 };
 
 fn eval_ast<'l>(form: MalType<'l>, env: &'l MalEnv<'l>) -> Result<MalType<'l>, MalError> {
     match form {
-        MalType::Atom(MalAtom::Symbol(form1)) => {
-            if let Some(op) = env.get(&form1) {
+        MalType::Symbol(form1) => {
+            if let Some(op) = env.get(&form1.name) {
                 Ok(op.clone())
             } else {
-                Err(MalError::Resolve(form1.clone()))
+                Err(MalError::Resolve(form1.name))
             }
         }
         MalType::List(l) => {

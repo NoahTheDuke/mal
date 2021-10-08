@@ -1,4 +1,4 @@
-use crate::types::{MalAtom, MalError, MalType};
+use crate::{symbol::Symbol, types::{MalAtom, MalError, MalType}};
 use pest::{error, iterators::Pair, Parser};
 use std::collections::HashMap;
 
@@ -11,7 +11,6 @@ pub struct MalParser;
 fn parse_atom(pair: Pair<Rule>) -> MalAtom {
     match pair.as_rule() {
         Rule::number => MalAtom::Integer(pair.as_str().parse().unwrap()),
-        Rule::symbol => MalAtom::Symbol(pair.as_str().to_owned()),
         Rule::string => MalAtom::Str(pair.as_str().to_owned()),
         Rule::keyword => MalAtom::Keyword({
             let kw = pair.as_str();
@@ -42,7 +41,8 @@ fn parse_value(pair: Pair<Rule>) -> Option<MalType> {
             }
             hm
         })),
-        Rule::number | Rule::symbol | Rule::string | Rule::keyword | Rule::boolean | Rule::nil => {
+        Rule::symbol => Some(MalType::Symbol(Symbol::new(pair.as_str().to_string()))),
+        Rule::number | Rule::string | Rule::keyword | Rule::boolean | Rule::nil => {
             Some(MalType::Atom(parse_atom(pair)))
         }
         _ => unreachable!("value? {:?}", pair.as_rule()),

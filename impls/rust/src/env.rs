@@ -1,16 +1,21 @@
 use std::collections::HashMap;
 
-use crate::{built_ins::{divide_fn, minus_fn, multiply_fn, plus_fn}, types::MalType};
+use crate::{
+    built_ins::{divide_fn, minus_fn, multiply_fn, plus_fn},
+    types::MalType,
+};
 
 #[derive(Debug, Clone)]
 pub struct MalEnv<'a> {
     data: HashMap<&'a str, MalType<'a>>,
+    outer: Option<Box<MalEnv<'a>>>,
 }
 
 impl<'a> MalEnv<'a> {
     pub fn new() -> Self {
         MalEnv {
             data: HashMap::new(),
+            outer: None,
         }
     }
 
@@ -29,7 +34,7 @@ impl<'a> MalEnv<'a> {
         let divide = divide_fn();
         data.insert(divide.name, MalType::Function(divide));
 
-        MalEnv { data }
+        MalEnv { data, outer: None }
     }
 }
 

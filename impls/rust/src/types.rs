@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use crate::symbol::Symbol;
+
 #[derive(Clone, Debug)]
 pub enum MalType<'a> {
     Atom(MalAtom),
@@ -7,12 +9,12 @@ pub enum MalType<'a> {
     Vector(Vec<MalType<'a>>),
     Map(HashMap<MalAtom, MalType<'a>>),
     Function(MalFunction<'a>),
+    Symbol(Symbol),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum MalAtom {
     Integer(isize),
-    Symbol(String),
     Keyword(String),
     Str(String),
     Boolean(bool),
