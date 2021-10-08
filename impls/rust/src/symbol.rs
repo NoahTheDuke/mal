@@ -23,6 +23,12 @@ mod tests {
 
     #[test]
     fn test() {
-        assert_eq!("a", Symbol { name: String::from("a") }.to_string());
+        assert_eq!(
+            "a",
+            Symbol {
+                name: String::from("a")
+            }
+            .to_string()
+        );
     }
 }

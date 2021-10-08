@@ -5,6 +5,12 @@ pub struct Keyword {
     pub name: String,
 }
 
+impl Keyword {
+    pub fn new(name: String) -> Self {
+        Keyword { name }
+    }
+}
+
 impl fmt::Display for Keyword {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, ":{}", self.name)
@@ -17,6 +23,12 @@ mod tests {
 
     #[test]
     fn test() {
-        assert_eq!(":a", Keyword { name: String::from("a") }.to_string());
+        assert_eq!(
+            ":a",
+            Keyword {
+                name: String::from("a")
+            }
+            .to_string()
+        );
     }
 }

@@ -4,7 +4,8 @@ use std::{fmt, result};
 impl fmt::Display for MalAtom {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            MalAtom::Keyword(k) => write!(f, ":{}", k),
+            MalAtom::Symbol(s) => write!(f, "{}", s),
+            MalAtom::Keyword(k) => write!(f, "{}", k),
             MalAtom::Integer(i) => write!(f, "{}", i),
             MalAtom::Str(s) => write!(f, "{}", s),
             MalAtom::Boolean(b) => write!(f, "{}", b),
@@ -42,7 +43,6 @@ impl fmt::Display for MalType<'_> {
                     .join(" ")
             ),
             MalType::Function(func) => write!(f, "[function {}]", func.name,),
-            MalType::Symbol(s) => write!(f, "{}", s),
         }
     }
 }
