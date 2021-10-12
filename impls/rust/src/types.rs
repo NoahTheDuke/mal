@@ -3,12 +3,12 @@ use std::collections::HashMap;
 use crate::{keyword::Keyword, symbol::Symbol};
 
 #[derive(Clone, Debug)]
-pub enum MalType<'a> {
+pub enum MalType {
     Atom(MalAtom),
-    List(Vec<MalType<'a>>),
-    Vector(Vec<MalType<'a>>),
-    Map(HashMap<MalAtom, MalType<'a>>),
-    Function(MalFunction<'a>),
+    List(Vec<MalType>),
+    Vector(Vec<MalType>),
+    Map(HashMap<MalAtom, MalType>),
+    Function(MalFunction),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -21,18 +21,18 @@ pub enum MalAtom {
     Nil,
 }
 
-#[derive(Clone, Copy)]
-pub struct MalFunction<'a> {
-    pub name: &'a str,
-    f: fn(&[MalType]) -> Result<MalType<'a>, MalError>,
+#[derive(Clone)]
+pub struct MalFunction {
+    pub name: Symbol,
+    f: fn(Vec<MalType>) -> Result<MalType, MalError>,
 }
 
-impl<'a> MalFunction<'a> {
-    pub fn new(name: &'a str, f: fn(&[MalType]) -> Result<MalType<'a>, MalError>) -> Self {
+impl MalFunction {
+    pub fn new(name: Symbol, f: fn(Vec::<MalType>) -> Result<MalType, MalError>) -> Self {
         MalFunction { name, f }
     }
 
-    pub fn invoke<'s>(&'s self, args: &[MalType]) -> Result<MalType<'a>, MalError> {
+    pub fn invoke(&self, args: Vec::<MalType>) -> Result<MalType, MalError> {
         (self.f)(args)
     }
 }

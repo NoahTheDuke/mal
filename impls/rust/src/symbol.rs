@@ -6,8 +6,12 @@ pub struct Symbol {
 }
 
 impl Symbol {
-    pub fn new(name: String) -> Self {
-        Symbol { name }
+    pub fn new(name: &str) -> Self {
+        Symbol { name: name.to_string() }
+    }
+
+    pub fn get_name(&self) -> String {
+        self.name.clone()
     }
 }
 

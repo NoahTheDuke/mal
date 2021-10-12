@@ -9,14 +9,14 @@ use std::collections::HashMap;
 pub static MAL_HISTORY: &str = ".mal-history";
 
 #[derive(Parser)]
-#[grammar = "parser/mal-grammer.pest"]
+#[grammar = "parser/grammar.pest"]
 pub struct MalParser;
 
 fn parse_atom(pair: Pair<Rule>) -> MalAtom {
     match pair.as_rule() {
         Rule::number => MalAtom::Integer(pair.as_str().parse().unwrap()),
         Rule::string => MalAtom::Str(pair.as_str().to_owned()),
-        Rule::symbol => MalAtom::Symbol(Symbol::new(pair.as_str().to_string())),
+        Rule::symbol => MalAtom::Symbol(Symbol::new(pair.as_str())),
         Rule::keyword => MalAtom::Keyword({
             let kw = pair.as_str();
             Keyword::new(kw.strip_prefix(':').unwrap_or(kw).to_string())

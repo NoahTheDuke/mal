@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-use mal::env::MalEnv;
+use mal::env::Env;
 use mal::eval;
 use mal::printer;
 use mal::reader;
@@ -11,14 +11,14 @@ fn READ(inp: &str) -> Result<Vec<MalType>, MalError> {
     reader::read_str(inp)
 }
 
-fn EVAL<'l>(form: MalType<'l>, env: &'l MalEnv<'l>) -> Result<MalType<'l>, MalError> {
+fn EVAL(form: MalType, env: &Env) -> Result<MalType, MalError> {
     eval::eval_form(form, env)
 }
 
-fn EVAL_forms<'l>(
-    forms: Vec<MalType<'l>>,
-    env: &'l MalEnv<'l>,
-) -> Result<Vec<MalType<'l>>, MalError> {
+fn EVAL_forms(
+    forms: Vec<MalType>,
+    env: &Env,
+) -> Result<Vec<MalType>, MalError> {
     forms.into_iter().map(|form| EVAL(form, env)).collect()
 }
 
@@ -30,13 +30,13 @@ fn PRINT(form: Vec<MalType>) -> Result<String, MalError> {
         .join("\n"))
 }
 
-fn rep(inp: &str, env: &MalEnv) -> Result<String, MalError> {
+fn rep(inp: &str, env: &Env) -> Result<String, MalError> {
     READ(inp)
         .and_then(|forms| EVAL_forms(forms, env))
         .and_then(PRINT)
 }
 
-pub fn prompt(env: MalEnv) {
+pub fn prompt(env: Env) {
     let mut rl = Editor::<()>::new();
     rl.load_history(reader::MAL_HISTORY).unwrap_or_default();
     loop {
@@ -68,20 +68,20 @@ pub fn prompt(env: MalEnv) {
 }
 
 fn main() {
-    let env = MalEnv::repl();
+    let env = Env::repl();
     prompt(env);
 }
 
 #[cfg(test)]
 mod tests {
     use crate::rep;
-    use mal::{env::MalEnv, types::MalError};
+    use mal::{env::Env, types::MalError};
     use regex::Regex;
     use std::fs;
 
     #[test]
     fn mal_tests() {
-        let env = MalEnv::repl();
+        let env = Env::repl();
         let tests = fs::read_to_string("tests/step2_eval.mal")
             .expect("Something went wrong reading the file");
         for (idx, p) in tests

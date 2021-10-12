@@ -1,19 +1,13 @@
 use std::collections::HashMap;
 
 use crate::{
-    env::MalEnv,
+    env::Env,
     types::{MalAtom, MalError, MalType},
 };
 
-fn eval_ast<'l>(form: MalType<'l>, env: &'l MalEnv<'l>) -> Result<MalType<'l>, MalError> {
+fn eval_ast(form: MalType, env: &Env) -> Result<MalType, MalError> {
     match form {
-        MalType::Atom(MalAtom::Symbol(form1)) => {
-            if let Some(op) = env.get_sym(&form1) {
-                Ok(op.clone())
-            } else {
-                Err(MalError::Resolve(form1.name))
-            }
-        }
+        MalType::Atom(MalAtom::Symbol(form1)) => env.get(&form1),
         MalType::List(l) => {
             let mut new_list = Vec::with_capacity(l.len());
             for inner_form in l.iter() {
@@ -39,14 +33,14 @@ fn eval_ast<'l>(form: MalType<'l>, env: &'l MalEnv<'l>) -> Result<MalType<'l>, M
     }
 }
 
-pub fn eval_form<'l>(form: MalType<'l>, env: &'l MalEnv<'l>) -> Result<MalType<'l>, MalError> {
+pub fn eval_form(form: MalType, env: &Env) -> Result<MalType, MalError> {
     match eval_ast(form, env)? {
         MalType::List(evaled_list) => {
             if evaled_list.is_empty() {
                 return Ok(MalType::List(evaled_list));
             }
             let symbol = evaled_list[0].clone();
-            let args = &evaled_list[1..];
+            let args = Vec::from(&evaled_list[1..]);
             match symbol {
                 MalType::Function(func) => func.invoke(args),
                 _ => Err(MalError::Normal(format!(

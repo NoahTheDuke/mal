@@ -1,0 +1,75 @@
+WHITESPACE = _{ " " | "\t" | "," | NEWLINE }
+COMMENT    = _{ ";" ~ (!NEWLINE ~ ANY)* }
+
+values = _{ SOI ~ value* ~ EOI }
+value = _{ (list | vector | map | atom) }
+
+list = { "(" ~ value* ~ ")" }
+vector = { "[" ~ value* ~ "]" }
+map = { "{" ~ (atom ~ value)* ~ "}" }
+
+dangling_left_paren = { "(" }
+dangling_right_paren = { ")" }
+dangling_left_brace = { "[" }
+dangling_right_brace = { "]" }
+dangling_left_bracket = { "{" }
+dangling_right_bracket = { "}" }
+
+wrapping_chars = _{
+    dangling_left_paren
+    | dangling_right_paren
+    | dangling_left_brace
+    | dangling_right_brace
+    | dangling_left_bracket
+    | dangling_right_bracket
+}
+
+atom = _{ (number | string | symbol | keyword | boolean | nil) }
+
+number = @{ ("-" | "+")? ~ ASCII_DIGIT+ }
+
+string = ${ "\"" ~ string_inner ~ "\"" }
+string_inner = @{ char* }
+char = _{
+    !("\"" | "\\") ~ ANY
+    | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+}
+dangling_string_quote = { "\"" }
+
+// symbol definition
+disallowed_symbol_characters = _{
+    WHITESPACE
+    | "'"
+    | "/"
+    | wrapping_chars
+    | dangling_string_quote
+}
+
+disallowed_initial_symbol_characters = _{ disallowed_symbol_characters | NUMBER }
+
+// in javascript: ([^\d/\s'][^/\s]*\/)?(\/|[^\d/\s'][^/\s]*)
+symbol = @{
+    (
+        (!disallowed_initial_symbol_characters ~ ANY)
+        ~
+        (!disallowed_symbol_characters ~ ANY)*
+        ~
+        "/"
+    )?
+    ~
+    (
+        // the division symbol is allowed if by itself
+        "/"
+        | (
+            (!disallowed_initial_symbol_characters ~ ANY)
+            ~
+            (!disallowed_symbol_characters ~ ANY)*
+        )
+    )
+}
+keyword = @{ ":" ~ symbol }
+
+boolean = { "true" | "false" }
+nil = { "nil" }
+
+quote = @{ "'" ~ value }

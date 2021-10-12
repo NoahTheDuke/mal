@@ -1,27 +1,42 @@
 use std::collections::HashMap;
 
-use crate::{built_ins::{divide_fn, minus_fn, multiply_fn, plus_fn}, symbol::Symbol, types::MalType};
+use crate::{
+    built_ins::{divide_fn, minus_fn, multiply_fn, plus_fn},
+    symbol::Symbol,
+    types::{MalError, MalType},
+};
 
 #[derive(Debug, Clone)]
-pub struct MalEnv<'a> {
-    data: HashMap<String, MalType<'a>>,
-    outer: Option<Box<MalEnv<'a>>>,
+pub struct Env {
+    data: HashMap<String, MalType>,
+    outer: Option<Box<Env>>,
 }
 
-impl<'a> MalEnv<'a> {
+impl Env {
     pub fn new() -> Self {
-        MalEnv {
+        Env {
             data: HashMap::new(),
             outer: None,
         }
     }
 
-    pub fn get(&self, key: &str) -> Option<&MalType> {
-        self.data.get(key)
+    pub fn find(&self, key: &Symbol) -> Option<MalType> {
+        if let Some(val) = self.data.get(&key.get_name()) {
+            Some(val.clone())
+        } else if let Some(outer) = &self.outer {
+            (*outer).find(key)
+        } else {
+            None
+        }
     }
 
-    pub fn get_sym(&self, key: &Symbol) -> Option<&MalType> {
-        self.data.get(&key.name)
+    pub fn get(&self, key: &Symbol) -> Result<MalType, MalError> {
+        self.find(key)
+            .ok_or_else(|| MalError::Resolve(key.get_name()))
+    }
+
+    pub fn set(&mut self, key: Symbol, val: MalType) -> Option<MalType> {
+        self.data.insert(key.get_name(), val)
     }
 
     pub fn repl() -> Self {
@@ -35,12 +50,12 @@ impl<'a> MalEnv<'a> {
         let divide = divide_fn();
         data.insert(divide.name.to_string(), MalType::Function(divide));
 
-        MalEnv { data, outer: None }
+        Env { data, outer: None }
     }
 }
 
-impl Default for MalEnv<'_> {
+impl Default for Env {
     fn default() -> Self {
-        MalEnv::new()
+        Env::new()
     }
 }

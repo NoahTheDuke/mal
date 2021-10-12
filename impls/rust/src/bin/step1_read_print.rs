@@ -69,7 +69,7 @@ mod tests {
     use std::fs;
 
     #[test]
-    fn mal_tests() {
+    fn step1_tests() {
         let tests = fs::read_to_string("tests/step1_read_print.mal")
             .expect("Something went wrong reading the file");
         for (idx, p) in tests
@@ -85,7 +85,7 @@ mod tests {
             .chunks(2)
             .enumerate()
         {
-            let input = p[0].to_owned();
+            let input = p[0].to_string();
             match rep(&input) {
                 Ok(result) => {
                     if let Some(expected) = p.get(1) {
@@ -93,7 +93,7 @@ mod tests {
                             let stripped = expected.strip_prefix(";=>").unwrap_or(expected);
                             assert!(
                                 stripped == result,
-                                "\nGiven    : `{}`\nExpected : `{}`\nGot      : `{}`",
+                                "\nGiven    : `{}`\nExpected : `{}`\nGot      : `{:?}`",
                                 input,
                                 stripped,
                                 result,

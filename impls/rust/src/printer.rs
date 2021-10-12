@@ -2,7 +2,7 @@ use crate::types::{MalAtom, MalError, MalFunction, MalType};
 use std::{fmt, result};
 
 impl fmt::Display for MalAtom {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             MalAtom::Symbol(s) => write!(f, "{}", s),
             MalAtom::Keyword(k) => write!(f, "{}", k),
@@ -14,8 +14,8 @@ impl fmt::Display for MalAtom {
     }
 }
 
-impl fmt::Display for MalType<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl fmt::Display for MalType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             MalType::Atom(v) => write!(f, "{}", v),
             MalType::List(l) => write!(
@@ -51,7 +51,7 @@ pub fn pr_str(code: &MalType) -> String {
     code.to_string()
 }
 
-impl fmt::Debug for MalFunction<'_> {
+impl fmt::Debug for MalFunction {
     fn fmt(&self, f: &mut fmt::Formatter) -> result::Result<(), fmt::Error> {
         f.debug_struct("Function")
             .field("name", &self.name)
@@ -60,11 +60,11 @@ impl fmt::Debug for MalFunction<'_> {
 }
 
 impl fmt::Display for MalError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             MalError::Normal(s) => write!(f, "{}", s),
             MalError::Parsing(s) => write!(f, "Parsing error{}", s),
-            MalError::Resolve(s) => write!(f, "Symbol `{}` does not exist", s),
+            MalError::Resolve(s) => write!(f, "Can't resolve symbol `{}`", s),
         }
     }
 }

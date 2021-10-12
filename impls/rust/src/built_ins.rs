@@ -1,6 +1,6 @@
-use crate::types::{MalAtom, MalError, MalFunction, MalType};
+use crate::{symbol::Symbol, types::{MalAtom, MalError, MalFunction, MalType}};
 
-fn parse_numbers(args: &[MalType]) -> Result<Vec<isize>, MalError> {
+fn parse_numbers(args: Vec<MalType>) -> Result<Vec<isize>, MalError> {
     let mut new_args = Vec::with_capacity(args.len());
     for arg in args.iter() {
         if let MalType::Atom(MalAtom::Integer(num)) = arg {
@@ -12,7 +12,7 @@ fn parse_numbers(args: &[MalType]) -> Result<Vec<isize>, MalError> {
     Ok(new_args)
 }
 
-fn plus<'a, 'b>(args: &'a [MalType]) -> Result<MalType<'b>, MalError> {
+fn plus(args: Vec<MalType>) -> Result<MalType, MalError> {
     let parsed_numbers = parse_numbers(args)?;
     match parsed_numbers.len() {
         0 => Ok(MalType::Atom(MalAtom::Integer(0))),
@@ -21,11 +21,11 @@ fn plus<'a, 'b>(args: &'a [MalType]) -> Result<MalType<'b>, MalError> {
     }
 }
 
-pub fn plus_fn<'a>() -> MalFunction<'a> {
-    MalFunction::new("+", plus)
+pub fn plus_fn() -> MalFunction {
+    MalFunction::new(Symbol::new("+"), plus)
 }
 
-fn minus<'a, 'b>(args: &'a [MalType]) -> Result<MalType<'b>, MalError> {
+fn minus(args: Vec<MalType>) -> Result<MalType, MalError> {
     let parsed_numbers = parse_numbers(args)?;
     match parsed_numbers.len() {
         0 => Ok(MalType::Atom(MalAtom::Integer(0))),
@@ -38,11 +38,11 @@ fn minus<'a, 'b>(args: &'a [MalType]) -> Result<MalType<'b>, MalError> {
     }
 }
 
-pub fn minus_fn<'a>() -> MalFunction<'a> {
-    MalFunction::new("-", minus)
+pub fn minus_fn() -> MalFunction {
+    MalFunction::new(Symbol::new("-"), minus)
 }
 
-fn multiply<'a, 'b>(args: &'a [MalType]) -> Result<MalType<'b>, MalError> {
+fn multiply(args: Vec<MalType>) -> Result<MalType, MalError> {
     let parsed_numbers = parse_numbers(args)?;
     match parsed_numbers.len() {
         0 => Ok(MalType::Atom(MalAtom::Integer(1))),
@@ -53,11 +53,11 @@ fn multiply<'a, 'b>(args: &'a [MalType]) -> Result<MalType<'b>, MalError> {
     }
 }
 
-pub fn multiply_fn<'a>() -> MalFunction<'a> {
-    MalFunction::new("*", multiply)
+pub fn multiply_fn() -> MalFunction {
+    MalFunction::new(Symbol::new("*"), multiply)
 }
 
-fn divide<'a, 'b>(args: &'a [MalType]) -> Result<MalType<'b>, MalError> {
+fn divide(args: Vec<MalType>) -> Result<MalType, MalError> {
     let parsed_numbers = parse_numbers(args)?;
     match parsed_numbers.len() {
         0 => Err(MalError::Normal("/ requires at least 1 arg".to_string())),
@@ -69,6 +69,6 @@ fn divide<'a, 'b>(args: &'a [MalType]) -> Result<MalType<'b>, MalError> {
     }
 }
 
-pub fn divide_fn<'a>() -> MalFunction<'a> {
-    MalFunction::new("/", divide)
+pub fn divide_fn() -> MalFunction {
+    MalFunction::new(Symbol::new("/"), divide)
 }
