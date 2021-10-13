@@ -11,6 +11,18 @@ pub enum MalType {
     Function(MalFunction),
 }
 
+impl PartialEq for MalType {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (MalType::Atom(s), MalType::Atom(o)) => s == o,
+            (MalType::List(s), MalType::List(o)) => s == o,
+            (MalType::Vector(s), MalType::Vector(o)) => s == o,
+            (MalType::Map(s), MalType::Map(o)) => s == o,
+            _ => false,
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum MalAtom {
     Symbol(Symbol),
