@@ -7,7 +7,9 @@ pub struct Symbol {
 
 impl Symbol {
     pub fn new(name: &str) -> Self {
-        Symbol { name: name.to_string() }
+        Symbol {
+            name: name.to_string(),
+        }
     }
 
     pub fn get_name(&self) -> String {

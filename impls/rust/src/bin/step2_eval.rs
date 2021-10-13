@@ -15,10 +15,7 @@ fn EVAL(form: MalType, env: &mut Env) -> Result<MalType, MalError> {
     eval::eval_form(form, env)
 }
 
-fn EVAL_forms(
-    forms: Vec<MalType>,
-    env: &mut Env,
-) -> Result<Vec<MalType>, MalError> {
+fn EVAL_forms(forms: Vec<MalType>, env: &mut Env) -> Result<Vec<MalType>, MalError> {
     forms.into_iter().map(|form| EVAL(form, env)).collect()
 }
 

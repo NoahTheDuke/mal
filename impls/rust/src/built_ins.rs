@@ -1,4 +1,7 @@
-use crate::{symbol::Symbol, types::{MalAtom, MalError, MalFunction, MalType}};
+use crate::{
+    symbol::Symbol,
+    types::{MalAtom, MalError, MalFunction, MalType},
+};
 
 fn parse_numbers(args: Vec<MalType>) -> Result<Vec<isize>, MalError> {
     let mut new_args = Vec::with_capacity(args.len());

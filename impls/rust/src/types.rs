@@ -40,11 +40,11 @@ pub struct MalFunction {
 }
 
 impl MalFunction {
-    pub fn new(name: Symbol, f: fn(Vec::<MalType>) -> Result<MalType, MalError>) -> Self {
+    pub fn new(name: Symbol, f: fn(Vec<MalType>) -> Result<MalType, MalError>) -> Self {
         MalFunction { name, f }
     }
 
-    pub fn invoke(&self, args: Vec::<MalType>) -> Result<MalType, MalError> {
+    pub fn invoke(&self, args: Vec<MalType>) -> Result<MalType, MalError> {
         (self.f)(args)
     }
 }

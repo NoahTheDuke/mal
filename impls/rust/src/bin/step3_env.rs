@@ -159,7 +159,9 @@ mod tests {
                             result,
                         )
                     }
-                    Some(Err(err)) => panic!("Got an unexpected error: {} for input: {:?}", err, t.inputs),
+                    Some(Err(err)) => {
+                        panic!("Got an unexpected error: {} for input: {:?}", err, t.inputs)
+                    }
                     None => unreachable!("How did we get here?"),
                 }
             } else if expected.starts_with(";/") || expected.starts_with(";.*") {
@@ -168,7 +170,8 @@ mod tests {
                 let results: Vec<Result<String, MalError>> =
                     t.inputs.iter().map(|input| rep(input, &mut env)).collect();
                 match results.last() {
-                    Some(Err(result @ MalError::Parsing(_))) | Some(Err(result @ MalError::Resolve(_))) => {
+                    Some(Err(result @ MalError::Parsing(_)))
+                    | Some(Err(result @ MalError::Resolve(_))) => {
                         let result_match = Regex::new(&format!("(?is){}", expected))
                             .unwrap()
                             .is_match(&result.to_string());
@@ -178,7 +181,9 @@ mod tests {
                             t.inputs, expected, result,
                         )
                     }
-                    Some(Err(err)) => panic!("Got an unexpected error: {} for input: {:?}", err, t.inputs),
+                    Some(Err(err)) => {
+                        panic!("Got an unexpected error: {} for input: {:?}", err, t.inputs)
+                    }
                     Some(Ok(result)) => panic!(
                         "Parsed when expected to fail: {:?} for input: {:?}",
                         result, t.inputs
