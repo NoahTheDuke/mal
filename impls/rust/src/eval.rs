@@ -62,35 +62,31 @@ fn execute_let_star(args: Vec<MalType>, env: &mut Env) -> Result<MalType, MalErr
             args.len(),
         )));
     }
-    let mut new_env = env.clone();
+    env.push_layer();
     match args.get(0) {
         None => unreachable!("First let* arg doesn't exist???"),
         Some(MalType::List(ref l)) | Some(MalType::Vector(ref l)) => {
             for pair in l {
-                match &pair {
-                    &MalType::List(p) | &MalType::Vector(p) => {
-                        if p.len() == 2 {
-                            match &p[0] {
-                                MalType::Atom(MalAtom::Symbol(s)) => {
-                                    let evaled_rhs = eval_form(p[1].clone(), &mut new_env)?;
-                                    new_env.set(s.clone(), evaled_rhs);
-                                }
-                                non_sym => {
-                                    return Err(MalError::Normal(format!(
-                                        "let* binding needs a symbol for lhs: {:?}",
-                                        non_sym
-                                    )));
-                                }
-                            }
-                        } else {
-                            return Err(MalError::Normal(String::from(
-                                "let* binding needs 2 parts",
+                let p = if let MalType::List(p) | MalType::Vector(p) = pair {
+                    p
+                } else {
+                    return Err(MalError::Normal(String::from("let* needs tuples")));
+                };
+                if p.len() == 2 {
+                    match &p[0] {
+                        MalType::Atom(MalAtom::Symbol(s)) => {
+                            let evaled_rhs = eval_form(p[1].clone(), env)?;
+                            env.set(s.clone(), evaled_rhs);
+                        }
+                        non_sym => {
+                            return Err(MalError::Normal(format!(
+                                "let* binding needs a symbol for lhs: {:?}",
+                                non_sym
                             )));
                         }
                     }
-                    _ => {
-                        return Err(MalError::Normal(String::from("let* needs tuples")));
-                    }
+                } else {
+                    return Err(MalError::Normal(String::from("let* binding needs 2 parts")));
                 }
             }
         }
@@ -103,8 +99,9 @@ fn execute_let_star(args: Vec<MalType>, env: &mut Env) -> Result<MalType, MalErr
     let nested_forms = Vec::from(&args[1..]);
     let results: Vec<Result<MalType, MalError>> = nested_forms
         .into_iter()
-        .map(|form| eval_form(form, &mut new_env))
+        .map(|form| eval_form(form, env))
         .collect();
+    env.pop_layer();
 
     if let Some(result) = results.last() {
         result.clone()
