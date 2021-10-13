@@ -118,7 +118,7 @@ mod tests {
                     }
                 }
                 Err(MalError::Parsing(ref err)) => {
-                    let expected = p[1].to_owned();
+                    let expected = p[1].to_string();
                     if expected.starts_with(";/") {
                         let replaced = expected.replace('{', "\\{");
                         let stripped = replaced.strip_prefix(";/").unwrap_or(&replaced);

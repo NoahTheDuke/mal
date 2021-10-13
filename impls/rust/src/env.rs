@@ -35,8 +35,9 @@ impl Env {
             .ok_or_else(|| MalError::Resolve(key.get_name()))
     }
 
-    pub fn set(&mut self, key: Symbol, val: MalType) -> Option<MalType> {
-        self.data.insert(key.get_name(), val)
+    pub fn set(&mut self, key: Symbol, val: MalType) -> MalType {
+        self.data.insert(key.get_name(), val);
+        self.data.get(&key.get_name()).unwrap().clone()
     }
 
     pub fn repl() -> Self {

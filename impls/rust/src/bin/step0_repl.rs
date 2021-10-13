@@ -76,7 +76,7 @@ mod tests {
             .chunks(2)
             .enumerate()
         {
-            let input = p[0].to_owned();
+            let input = p[0].to_string();
             match rep(&input) {
                 Ok(result) => {
                     if let Some(expected) = p.get(1) {

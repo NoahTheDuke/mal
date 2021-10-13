@@ -5,7 +5,7 @@ use crate::{
     types::{MalAtom, MalError, MalType},
 };
 
-fn eval_ast(form: MalType, env: &Env) -> Result<MalType, MalError> {
+fn resolve_ast(form: MalType, env: &mut Env) -> Result<MalType, MalError> {
     match form {
         MalType::Atom(MalAtom::Symbol(form1)) => env.get(&form1),
         MalType::List(l) => {
@@ -33,22 +33,53 @@ fn eval_ast(form: MalType, env: &Env) -> Result<MalType, MalError> {
     }
 }
 
-pub fn eval_form(form: MalType, env: &Env) -> Result<MalType, MalError> {
-    match eval_ast(form, env)? {
-        MalType::List(evaled_list) => {
-            if evaled_list.is_empty() {
-                return Ok(MalType::List(evaled_list));
-            }
-            let symbol = evaled_list[0].clone();
-            let args = Vec::from(&evaled_list[1..]);
-            match symbol {
-                MalType::Function(func) => func.invoke(args),
-                _ => Err(MalError::Normal(format!(
-                    "Symbol `{:?}` is not a function",
-                    symbol
-                ))),
-            }
+fn execute_def(args: Vec<MalType>, env: &mut Env) -> Result<MalType, MalError> {
+    if args.len() != 2 {
+        return Err(MalError::Normal(format!(
+            "Wrong number of args for def!. Need 2, received {}",
+            args.len(),
+        )));
+    }
+    match (args.get(0), args.get(1)) {
+        (Some(&MalType::Atom(MalAtom::Symbol(ref new_symbol))), Some(arg)) => {
+            let evaled_arg = eval_form(arg.clone(), env)?;
+            Ok(env.set(new_symbol.clone(), evaled_arg))
         }
-        non_list => Ok(non_list),
+        (Some(non_sym), None) => Err(MalError::Normal(format!(
+            "First arg to def! must be a symbol. Given {:?}",
+            non_sym,
+        ))),
+        _ => Err(MalError::Normal(String::from(
+            "Second arg to def! must exist, given None",
+        ))),
+    }
+}
+
+pub fn eval_form(form: MalType, env: &mut Env) -> Result<MalType, MalError> {
+    match form {
+        MalType::List(l) => match l.get(0) {
+            None => Ok(MalType::List(l)),
+            Some(MalType::Atom(MalAtom::Symbol(sym))) if sym.name == "def!" => {
+                execute_def(Vec::from(&l[1..]), env)
+            }
+            _ => match resolve_ast(MalType::List(l), env)? {
+                MalType::List(evaled_list) => {
+                    if evaled_list.is_empty() {
+                        return Ok(MalType::List(evaled_list));
+                    }
+                    let symbol = evaled_list[0].clone();
+                    let args = Vec::from(&evaled_list[1..]);
+                    match symbol {
+                        MalType::Function(func) => func.invoke(args),
+                        _ => Err(MalError::Normal(format!(
+                            "Symbol `{:?}` is not a function",
+                            symbol
+                        ))),
+                    }
+                }
+                non_list => Ok(non_list),
+            },
+        },
+        non_list => resolve_ast(non_list, env),
     }
 }

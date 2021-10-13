@@ -15,12 +15,11 @@ pub struct MalParser;
 fn parse_atom(pair: Pair<Rule>) -> MalAtom {
     match pair.as_rule() {
         Rule::number => MalAtom::Integer(pair.as_str().parse().unwrap()),
-        Rule::string => MalAtom::Str(pair.as_str().to_owned()),
+        Rule::string => MalAtom::Str(pair.as_str().to_string()),
         Rule::symbol => MalAtom::Symbol(Symbol::new(pair.as_str())),
-        Rule::keyword => MalAtom::Keyword({
-            let kw = pair.as_str();
-            Keyword::new(kw.strip_prefix(':').unwrap_or(kw).to_string())
-        }),
+        Rule::keyword => MalAtom::Keyword(Keyword::new(
+            pair.as_str().strip_prefix(':').unwrap().to_string(),
+        )),
         Rule::boolean => MalAtom::Boolean(pair.as_str() == "true"),
         Rule::nil => MalAtom::Nil,
         _ => unreachable!("atom? {:?}", pair.as_rule()),

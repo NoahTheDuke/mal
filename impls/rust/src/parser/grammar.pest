@@ -8,29 +8,18 @@ list = { "(" ~ value* ~ ")" }
 vector = { "[" ~ value* ~ "]" }
 map = { "{" ~ (atom ~ value)* ~ "}" }
 
-dangling_left_paren = { "(" }
-dangling_right_paren = { ")" }
-dangling_left_brace = { "[" }
-dangling_right_brace = { "]" }
-dangling_left_bracket = { "{" }
-dangling_right_bracket = { "}" }
+dangling_parens = { "(" | ")" }
+dangling_square = { "[" | "]"}
+dangling_curly = { "{" | "}" }
 
-wrapping_chars = _{
-    dangling_left_paren
-    | dangling_right_paren
-    | dangling_left_brace
-    | dangling_right_brace
-    | dangling_left_bracket
-    | dangling_right_bracket
-}
+wrapping_chars = _{ dangling_parens | dangling_square | dangling_curly }
 
 atom = _{ (number | string | symbol | keyword | boolean | nil) }
 
 number = @{ ("-" | "+")? ~ ASCII_DIGIT+ }
 
-string = ${ "\"" ~ string_inner ~ "\"" }
-string_inner = @{ char* }
-char = _{
+string = ${ "\"" ~ string_chars* ~ "\"" }
+string_chars = _{
     !("\"" | "\\") ~ ANY
     | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
 }
@@ -51,19 +40,15 @@ disallowed_initial_symbol_characters = _{ disallowed_symbol_characters | NUMBER 
 symbol = @{
     (
         (!disallowed_initial_symbol_characters ~ ANY)
-        ~
-        (!disallowed_symbol_characters ~ ANY)*
-        ~
-        "/"
+        ~ (!disallowed_symbol_characters ~ ANY)*
+        ~ "/"
     )?
-    ~
-    (
+    ~ (
         // the division symbol is allowed if by itself
         "/"
         | (
             (!disallowed_initial_symbol_characters ~ ANY)
-            ~
-            (!disallowed_symbol_characters ~ ANY)*
+            ~ (!disallowed_symbol_characters ~ ANY)*
         )
     )
 }
