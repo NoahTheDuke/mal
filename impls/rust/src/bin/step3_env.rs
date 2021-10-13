@@ -127,7 +127,7 @@ mod tests {
                 inputs: Vec::new(),
                 output: String::default(),
             };
-            while let Some(next_input) = cleaned_tests.next() {
+            for next_input in &mut cleaned_tests {
                 if next_input.starts_with(";=>")
                     || next_input.starts_with(";/")
                     || next_input.starts_with(";.*")
